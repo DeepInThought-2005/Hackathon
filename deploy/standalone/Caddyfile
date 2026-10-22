@@ -1,0 +1,14 @@
+:8080 {
+    handle /api/* {
+        # No trusted login provider is configured yet. Never accept browser identity headers.
+        reverse_proxy backend:8080 {
+            header_up -X-User-Id
+            header_up -X-User-Name
+        }
+    }
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}

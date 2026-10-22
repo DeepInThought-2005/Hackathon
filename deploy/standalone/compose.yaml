@@ -1,0 +1,63 @@
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: askpool
+      POSTGRES_USER: askpool_app
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U askpool_app -d askpool"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 256m
+    logging: *default-logging
+    restart: unless-stopped
+
+  backend:
+    image: eclipse-temurin:21-jre
+    working_dir: /app
+    command: ["java", "-jar", "/app/backend.jar"]
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms64m -Xmx384m -XX:MaxMetaspaceSize=192m
+      APP_FRONTEND_ORIGIN: ${APP_ORIGIN:?Set APP_ORIGIN in .env}
+      DATABASE_URL: jdbc:postgresql://postgres:5432/askpool
+      DATABASE_USER: askpool_app
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+      DATABASE_BASELINE: "false"
+      MODERATION_URL: ""
+      IDENTITY_MODE: guest
+      GUEST_IDENTITY_SECRET: ${GUEST_IDENTITY_SECRET:?Set a persistent random guest signing secret}
+    volumes:
+      - ./artifacts/backend.jar:/app/backend.jar:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 768m
+    logging: *default-logging
+    restart: unless-stopped
+
+  frontend:
+    image: caddy:2-alpine
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8092}:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./artifacts/frontend:/srv:ro
+    depends_on:
+      - backend
+    mem_limit: 128m
+    logging: *default-logging
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+

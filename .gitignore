@@ -24,3 +24,7 @@ backend/.local-postgres/
 **/.venv/
 **/__pycache__/
 moderation/.model-cache/
+
+/deploy/standalone/artifacts/
+/standalone-deploy.tar.gz
+/deploy/standalone/secrets/

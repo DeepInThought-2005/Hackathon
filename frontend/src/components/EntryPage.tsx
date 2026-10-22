@@ -33,13 +33,14 @@ export default function EntryPage({
           role={identity.status === 'error' ? 'alert' : 'status'}
         >
           {loading
-            ? 'Checking sign-in…'
+            ? 'Preparing your guest space…'
             : identity.status === 'ready'
               ? identity.user.name
               : identity.status === 'error'
-                ? 'Could not verify sign-in. Choose a space to retry.'
-                : 'Sign in to continue.'}
+                ? 'Could not prepare your guest space. Choose a space to retry.'
+                : 'Choose a space to retry.'}
         </div>
+        <p>No sign-in required. Your history belongs to this browser. Clearing cookies or changing devices creates a new guest.</p>
         <div className="entry-roles" role="group" aria-label="Choose a space">
           {(['student', 'professor'] as const).map((space) => (
             <button

@@ -218,7 +218,7 @@ export default function App() {
   async function enterSpace(space: 'student' | 'professor') {
     if (identity.status === 'signed-out') {
       window.location.assign(
-        `https://08.hackathon.ethz.ch/${space}${window.location.search}`,
+        `/${space}${window.location.search}`,
       )
       return
     }
@@ -234,7 +234,7 @@ export default function App() {
     } catch (error) {
       if (error instanceof IdentityError && error.status === 401) {
         window.location.assign(
-          `https://08.hackathon.ethz.ch/${space}${window.location.search}`,
+          `/${space}${window.location.search}`,
         )
       } else {
         setIdentity({ status: 'error' })
