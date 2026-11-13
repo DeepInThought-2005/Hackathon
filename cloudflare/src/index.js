@@ -519,7 +519,29 @@ async function api(request, env) {
     if (user.setCookie) response.headers.append('Set-Cookie', user.setCookie);
     return response;
   };
-  if (url.pathname === '/api/me' && request.method === 'GET') return respond(json(200, { id: user.id, name: user.name }));
+  if (url.pathname === '/api/me') {
+    if (request.method === 'GET') {
+      const row = await env.DB.prepare('SELECT display_name FROM users WHERE identity = ?').bind(user.id).first();
+      return respond(json(200, { id: user.id, name: row?.display_name || user.name }));
+    }
+    if (request.method === 'PUT') {
+      // An empty name resets to the default guest name.
+      let name;
+      try {
+        name = (await body(request)).name;
+        if (typeof name !== 'string') throw new ApiError(400, 'Enter a name.');
+        name = name.trim().replace(/\s+/g, ' ');
+        if (name.length > 40) throw new ApiError(400, 'Your name must be at most 40 characters.');
+        if (name && blocks(name)) throw new ApiError(422, 'That name contains wording that is not allowed.');
+      } catch (error) {
+        if (error instanceof ApiError) return respond(json(error.status, { error: error.message }));
+        throw error;
+      }
+      await env.DB.prepare(`INSERT INTO users (identity, display_name) VALUES (?1, ?2)
+        ON CONFLICT (identity) DO UPDATE SET display_name = excluded.display_name`).bind(user.id, name || null).run();
+      return respond(json(200, { id: user.id, name: name || user.name }));
+    }
+  }
 
   let matched = false;
   for (const { method, pattern, handler } of routes) {

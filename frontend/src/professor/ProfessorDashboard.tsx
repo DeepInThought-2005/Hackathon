@@ -23,6 +23,7 @@ import type { CurrentUser } from '../lib/api'
 import type { ProfessorCourse } from './professorProfile'
 import CourseChooser from './CourseChooser'
 import CourseSettings from './CourseSettings'
+import UsernameSettings from '../components/UsernameSettings'
 import {
   filterOpenQuestions,
   sortQuestions,
@@ -1331,6 +1332,9 @@ export default function ProfessorDashboard({
           >
             Settings
           </h1>
+          <div className="mt-8">
+            <UsernameSettings user={user} />
+          </div>
           <CourseSettings
             courses={courses}
             onSaveCourses={onSaveCourses}

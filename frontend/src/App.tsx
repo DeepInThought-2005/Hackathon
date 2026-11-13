@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import EntryPage from './components/EntryPage'
-import { getCurrentUser, IdentityError } from './lib/api'
+import { getCurrentUser, IdentityError, USER_CHANGED_EVENT } from './lib/api'
 import type { CurrentUser } from './lib/api'
 import type { ProfessorCourse } from './professor/professorProfile'
 import {
@@ -205,11 +205,18 @@ export default function App() {
     const onVisibility = () => {
       if (document.visibilityState === 'visible') refreshIdentity()
     }
+    const onUserChanged = (event: Event) => {
+      const user = (event as CustomEvent<CurrentUser>).detail
+      if (user.id === signedInUserId.current)
+        setIdentity({ status: 'ready', user })
+    }
     refreshIdentity()
+    window.addEventListener(USER_CHANGED_EVENT, onUserChanged)
     window.addEventListener('focus', refreshIdentity)
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       controller?.abort()
+      window.removeEventListener(USER_CHANGED_EVENT, onUserChanged)
       window.removeEventListener('focus', refreshIdentity)
       document.removeEventListener('visibilitychange', onVisibility)
     }
@@ -217,9 +224,7 @@ export default function App() {
 
   async function enterSpace(space: 'student' | 'professor') {
     if (identity.status === 'signed-out') {
-      window.location.assign(
-        `/${space}${window.location.search}`,
-      )
+      window.location.assign(`/${space}${window.location.search}`)
       return
     }
     if (identity.status === 'ready') {
@@ -233,9 +238,7 @@ export default function App() {
       navigate(`/${space}`)
     } catch (error) {
       if (error instanceof IdentityError && error.status === 401) {
-        window.location.assign(
-          `/${space}${window.location.search}`,
-        )
+        window.location.assign(`/${space}${window.location.search}`)
       } else {
         setIdentity({ status: 'error' })
       }

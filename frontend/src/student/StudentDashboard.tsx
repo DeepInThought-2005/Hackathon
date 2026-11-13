@@ -24,6 +24,7 @@ import {
   saveTutorialDismissed,
 } from './lib/tutorialProgress'
 import type { CurrentUser } from '../lib/api'
+import UsernameSettings from '../components/UsernameSettings'
 import {
   ApiRequestError,
   getLecture,
@@ -1439,21 +1440,25 @@ export default function StudentDashboard({ user }: { user: CurrentUser }) {
                 )}
               </CourseHistory>
             ) : (
-              <div className="placeholder-page__card student-settings-card">
-                <div>
-                  <h2>Tutorial</h2>
-                  <p>
-                    Need a refresher? You can replay the student guide anytime.
-                  </p>
+              <>
+                <UsernameSettings user={user} />
+                <div className="placeholder-page__card student-settings-card">
+                  <div>
+                    <h2>Tutorial</h2>
+                    <p>
+                      Need a refresher? You can replay the student guide
+                      anytime.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="student-settings-open-tutorial"
+                    onClick={openTutorial}
+                  >
+                    Open tutorial <span aria-hidden="true">→</span>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  className="student-settings-open-tutorial"
-                  onClick={openTutorial}
-                >
-                  Open tutorial <span aria-hidden="true">→</span>
-                </button>
-              </div>
+              </>
             )}
           </section>
         </main>

@@ -34,6 +34,26 @@ export async function getCurrentUser(
   return { id: data.id, name: data.name }
 }
 
+// Dashboards receive the user from App; this event lets App show a new name everywhere.
+export const USER_CHANGED_EVENT = 'askpool:user-changed'
+
+export async function updateUsername(name: string): Promise<CurrentUser> {
+  const response = await fetch(baseUrl + '/api/me', {
+    method: 'PUT',
+    credentials: 'same-origin',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  const data = await response.json().catch(() => null)
+  if (!response.ok)
+    throw new Error(
+      data?.error || `Could not save your name (${response.status}).`,
+    )
+  const user: CurrentUser = { id: data.id, name: data.name }
+  window.dispatchEvent(new CustomEvent(USER_CHANGED_EVENT, { detail: user }))
+  return user
+}
+
 export type HelloResponse = { message: string }
 
 export async function getHello(): Promise<HelloResponse> {
