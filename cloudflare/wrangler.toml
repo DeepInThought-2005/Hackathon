@@ -1,0 +1,21 @@
+# AskPool on Cloudflare: the Worker serves /api/* from D1 and everything else
+# from the built React frontend (../frontend/dist), as a single-page app.
+name = "askpool"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "../frontend/dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# Created with:  npx wrangler d1 create askpool
+[[d1_databases]]
+binding = "DB"
+database_name = "askpool"
+database_id = "ccb63115-4f95-4557-bc5a-7f5ba4133d5c"
+migrations_dir = "migrations"
+
+# Secret (not in this file), at least 32 random bytes; keep it stable across deploys:
+#   npx wrangler secret put GUEST_IDENTITY_SECRET

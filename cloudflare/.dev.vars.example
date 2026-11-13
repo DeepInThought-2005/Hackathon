@@ -1,0 +1,1 @@
+GUEST_IDENTITY_SECRET=local-development-secret-at-least-32-bytes-long

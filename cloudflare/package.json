@@ -1,0 +1,14 @@
+{
+  "name": "askpool-cloudflare",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix ../frontend ci --no-audit --no-fund && npm --prefix ../frontend run build",
+    "migrate:local": "wrangler d1 migrations apply askpool --local",
+    "migrate": "wrangler d1 migrations apply askpool --remote",
+    "dev": "wrangler dev --port 8791",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
